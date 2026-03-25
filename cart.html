@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🛒 Your Cart</h1>
+<a href="index.html">Back to Shop</a>
+
+<div id="cart" class="container"></div>
+
+<h2 id="total"></h2>
+
+<button onclick="placeOrder()" class="order-btn">Place Order</button>
+
+<h3>📦 Order History</h3>
+<div id="orders"></div>
+
+<script>
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+const cartDiv = document.getElementById("cart");
+const totalDiv = document.getElementById("total");
+const ordersDiv = document.getElementById("orders");
+
+let total = 0;
+cartDiv.innerHTML = "";
+cart.forEach((item, index) => {
+    let qty = item.qty || 1;
+    total += item.price * qty;
+
+    cartDiv.innerHTML += `
+        <div class="card">
+            <h3>${item.name}</h3>
+            <p>₹${item.price}</p>
+            <p>Qty: ${qty}</p>
+
+            <button onclick="increase(${index})">+</button>
+            <button onclick="decrease(${index})">-</button>
+            <button onclick="removeItem(${index})">Remove</button>
+        </div>
+    `;
+});
+
+totalDiv.innerText = "Total: ₹" + total;
+function increase(index) {
+    cart[index].qty = (cart[index].qty || 1) + 1;
+    localStorage.setItem("cart", JSON.stringify(cart));
+    location.reload();
+}
+
+function decrease(index) {
+    if ((cart[index].qty || 1) > 1) {
+        cart[index].qty--;
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    location.reload();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    location.reload();
+}
+function placeOrder() {
+    if (cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+    }
+
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    orders.push({
+        items: cart,
+        total: total,
+        date: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("orders", JSON.stringify(orders));
+    localStorage.removeItem("cart");
+
+    alert("Order placed successfully!");
+    location.reload();
+}
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+orders.forEach(order => {
+    ordersDiv.innerHTML += `
+        <div class="order-card">
+            <p><strong>Date:</strong> ${order.date}</p>
+            <p><strong>Total:</strong> ₹${order.total}</p>
+        </div>
+    `;
+});
+</script>
+
+</body>
+</html>
